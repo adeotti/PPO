@@ -61,17 +61,16 @@ class network(nn.Module):
         return F.softmax(policyOut,-1),valueOut
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-model.load_state_dict(torch.load("./mario100k.pth"))
+#model.load_state_dict(torch.load("./mario100k.pth"))
 
- 
-
+done = True
 for step in range(5000):
-   
-    transformed_state = _transoform(state)
-    dist,_ = model.forward(transformed_state)
-    action = Categorical(dist).sample()
-    sys.exit("here")
-    state, reward, done, info,_ = env.step(env.action_space.sample())
+    if done:
+        state,_ = env.reset()
+    state = _transoform(state)
+    dist,_ = model.forward(state)
+    action = Categorical(dist).sample().item()
+    state, reward, done, info,_ = env.step(action)
     env.render()
-env.close()
 
+env.close()
