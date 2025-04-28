@@ -15,6 +15,21 @@ import warnings
 warnings.filterwarnings("ignore")
 
  
+env = gym_super_mario_bros.make('SuperMarioBros-v0',apply_api_compatibility=True,render_mode="human")
+env = JoypadSpace(env, SIMPLE_MOVEMENT)
+env = FrameStack(env,5)
+ 
+def _transoform(observation):
+    _list_ = []
+    for element in observation:
+        _tonumpy = np.array(element)
+        _topil = Image.fromarray(_tonumpy)
+        _grayscale = to_tensor(v2.Grayscale(1)(_topil))
+        _resized = Resize((150,150))(_grayscale)
+        _list_.append(_resized)
+    return torch.stack(_list_,dim=0).permute(1,0,2,3)
+
+
 class network(nn.Module):
     def __init__(self):
         super().__init__()
@@ -44,51 +59,19 @@ class network(nn.Module):
         policyOut = self.policyHead(x)
         valueOut = self.valueHead(x)
         return F.softmax(policyOut,-1),valueOut
-network()(torch.rand((5,1,150,150),dtype=torch.float))
+network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
 model.load_state_dict(torch.load("./mario100k.pth"))
+
  
-env = gym_super_mario_bros.make('SuperMarioBros-v0',apply_api_compatibility=True,render_mode="human")
-env = JoypadSpace(env, SIMPLE_MOVEMENT)
-env = FrameStack(env,5)
 
-def _transoform(observation):
-    _list_ = []
-    for element in observation:
-        _tonumpy = np.array(element)
-        _topil = Image.fromarray(_tonumpy)
-        _grayscale = to_tensor(v2.Grayscale(1)(_topil))
-        _resized = Resize((150,150))(_grayscale)
-        _list_.append(_resized)
-    return torch.stack(_list_,dim=0).permute(1,0,2,3)
-
-s,_ = env.reset()
-s = _transoform(s)
- 
-print(s.shape)
-
-
-
-
-"""done = True
 for step in range(5000):
-    if done:
-        state,_ = env.reset()
+   
+    transformed_state = _transoform(state)
+    dist,_ = model.forward(transformed_state)
+    action = Categorical(dist).sample()
+    sys.exit("here")
     state, reward, done, info,_ = env.step(env.action_space.sample())
     env.render()
 env.close()
-"""
 
-
-
-"""_list_ = []
-    _image = np.array(state)
-    for i in range(5): # grayscale,downsampling,downscaling frame by frame
-        _pil = Image.fromarray(_image[i])
-        _observation = to_tensor(v2.Grayscale(1)(_pil))
-        _resized = Resize((150,150))(_observation)
-        _list_.append(_resized)
-    _states = torch.stack(_list_,dim=0)
-    #dist,_ = model.forward(_states)
-    #action = Categorical(dist).sample()
-    sys.exit(model.forward(_states))"""
