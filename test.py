@@ -60,7 +60,7 @@ def _transoform(observation):
         _grayscale = to_tensor(v2.Grayscale(1)(_topil))
         _resized = Resize((150,150))(_grayscale)
         _list_.append(_resized)
-    return torch.stack(_list_,dim=0)
+    return torch.stack(_list_,dim=0).permute(1,0,2,3)
 
 s,_ = env.reset()
 s = _transoform(s)
