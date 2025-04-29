@@ -60,7 +60,7 @@ class network(nn.Module):
         return F.softmax(policyOut,-1),valueOut
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-model.load_state_dict(torch.load("./mario150k.pth"))
+model.load_state_dict(torch.load("./mario30k.pth"))
 
 done = True
 for step in range(5000):
