@@ -14,12 +14,11 @@ from gymnasium.wrappers import FrameStack
 import warnings
 warnings.filterwarnings("ignore")
 
- 
 env = gym_super_mario_bros.make('SuperMarioBros-v0',apply_api_compatibility=True,render_mode="human")
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 env = FrameStack(env,5)
  
-def _transoform(observation):
+def _transform(observation):
     _list_ = []
     for element in observation:
         _tonumpy = np.array(element)
@@ -61,16 +60,17 @@ class network(nn.Module):
         return F.softmax(policyOut,-1),valueOut
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-#model.load_state_dict(torch.load("./mario100k.pth"))
+model.load_state_dict(torch.load("./mario150k.pth"))
 
 done = True
 for step in range(5000):
     if done:
         state,_ = env.reset()
-    state = _transoform(state)
+    state = _transform(state)
     dist,_ = model.forward(state)
     action = Categorical(dist).sample().item()
     state, reward, done, info,_ = env.step(action)
+    
     env.render()
 
 env.close()
