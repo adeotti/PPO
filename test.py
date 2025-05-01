@@ -21,11 +21,11 @@ env = FrameStack(env,5)
 def _transform(observation):
     _list_ = []
     for element in observation:
-        _tonumpy = np.array(element)
-        _topil = Image.fromarray(_tonumpy)
-        _grayscale = to_tensor(v2.Grayscale(1)(_topil))
-        _resized = Resize((150,150))(_grayscale)
-        _list_.append(_resized)
+        tonumpy = np.array(element)
+        topil = Image.fromarray(tonumpy)
+        grayscale = to_tensor(v2.Grayscale(1)(topil))
+        resized = Resize((150,150))(grayscale)
+        _list_.append(resized)
     return torch.stack(_list_,dim=0).permute(1,0,2,3)
 
 
@@ -61,17 +61,19 @@ class network(nn.Module):
     
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-model.load_state_dict(torch.load("./mario800",map_location="cpu"),strict=False)
+model.load_state_dict(torch.load("./policies/mario800",map_location="cpu"),strict=False)
 
-done = True
-for step in range(5000):
-    if done:
-        state,_ = env.reset()
-    state = _transform(state)
-    dist,_ = model.forward(state)
-    action = Categorical(dist).sample().item()
-    state, reward, done, info,_ = env.step(action)
-    print(reward)
-    env.render()
 
-env.close()
+if __name__ == "__main__":
+    done = True
+    for step in range(5000):
+        if done:
+            state,_ = env.reset()
+        state = _transform(state)
+        dist,_ = model.forward(state)
+        action = Categorical(dist).sample().item()
+        state, reward, done, info,_ = env.step(action)
+        env.render()
+
+    env.close()
+
