@@ -58,9 +58,10 @@ class network(nn.Module):
         policyOut = self.policyHead(x)
         valueOut = self.valueHead(x)
         return F.softmax(policyOut,-1),valueOut
+    
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-model.load_state_dict(torch.load("./mario30k.pth"))
+model.load_state_dict(torch.load("./mario800",map_location="cpu"),strict=False)
 
 done = True
 for step in range(5000):
@@ -70,7 +71,7 @@ for step in range(5000):
     dist,_ = model.forward(state)
     action = Categorical(dist).sample().item()
     state, reward, done, info,_ = env.step(action)
-    
+    print(reward)
     env.render()
 
 env.close()
