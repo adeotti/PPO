@@ -1,7 +1,6 @@
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
-import sys
 import numpy as np
 import torch
 import torch.nn as nn
@@ -17,6 +16,7 @@ warnings.filterwarnings("ignore")
 env = gym_super_mario_bros.make('SuperMarioBros-v0',apply_api_compatibility=True,render_mode="human")
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 env = FrameStack(env,5)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
  
 def _transform(observation):
     _list_ = []
@@ -61,7 +61,7 @@ class network(nn.Module):
     
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-model.load_state_dict(torch.load("./policies/mario800",map_location="cpu"),strict=False)
+model.load_state_dict(torch.load("./policies/mario800",map_location=device),strict=False)
 
 
 if __name__ == "__main__":
