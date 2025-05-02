@@ -61,7 +61,7 @@ class network(nn.Module):
     
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-model.load_state_dict(torch.load("./mario900k_10e",map_location=device),strict=False)
+model.load_state_dict(torch.load("./mario_100.pth",map_location=device),strict=False)
 
 
 if __name__ == "__main__":
