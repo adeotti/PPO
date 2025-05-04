@@ -61,7 +61,7 @@ class network(nn.Module):
     
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-model.load_state_dict(torch.load("./data/2_mario200",map_location=device),strict=False)
+model.load_state_dict(torch.load("./mario200",map_location=device),strict=False)
 
 
 if __name__ == "__main__":
@@ -73,6 +73,7 @@ if __name__ == "__main__":
         dist,_ = model.forward(state)
         action = Categorical(dist).sample().item()
         state, reward, done, info,_ = env.step(action)
+        print(reward)
         env.render()
 
     env.close()
