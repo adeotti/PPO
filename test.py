@@ -61,20 +61,21 @@ class network(nn.Module):
     
 network()(torch.rand((1,5,150,150),dtype=torch.float))
 model = network()
-chck = torch.load("./mario200",map_location=device)
+chck = torch.load("./mario100",map_location=device)
 model.load_state_dict(chck["model_state"],strict=False)
 
 if __name__ == "__main__":
     done = True
-    for step in range(5000):
+    for step in range(500):
         if done:
             state,_ = env.reset()
         state = _transform(state)
         dist,_ = model.forward(state)
+        print(dist)
         action = Categorical(dist).sample().item()
         state, reward, done, info,_ = env.step(action)
-        print(reward)
-        env.render()
+        print(action)
+        
 
     env.close()
 
