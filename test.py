@@ -7,12 +7,14 @@ import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 import torch.nn.functional as F
+from gym.wrappers import FrameStack
 import warnings
 warnings.filterwarnings("ignore")
 
 env = gym_super_mario_bros.make('SuperMarioBros-v0',apply_api_compatibility=True,render_mode="human")
 env = JoypadSpace(env, SIMPLE_MOVEMENT)
 env = GrayScaleObservation(env=env,keep_dim=True)
+env = FrameStack(env,5)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 class network(nn.Module):
@@ -42,7 +44,7 @@ class network(nn.Module):
 
 model = network()
 model.forward(torch.rand((1,5,240,256),dtype=torch.float))
-chck = torch.load("./",map_location=device)
+chck = torch.load("./mario50",map_location=device)
 model.load_state_dict(chck["model_state"],strict=False)
 
 if __name__ == "__main__":
@@ -50,7 +52,7 @@ if __name__ == "__main__":
     for step in range(5000):
         if done:
             state,_ = env.reset()
-        state = None # TODO transform
+        state = torch.from_numpy(np.array(state)).squeeze().unsqueeze(0).to(torch.float)
         dist,_ = model.forward(state)
         action = Categorical(dist).sample().item()
         state, reward, done, info,_ = env.step(action)
