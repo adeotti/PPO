@@ -44,7 +44,7 @@ class network(nn.Module):
 
 model = network()
 model.forward(torch.rand((1,5,240,256),dtype=torch.float))
-chck = torch.load("./",map_location=device)
+chck = torch.load("./mario210.txt",map_location=device)
 model.load_state_dict(chck["model_state"],strict=False)
 
 if __name__ == "__main__":
