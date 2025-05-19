@@ -10,12 +10,17 @@ from gym.wrappers import GrayScaleObservation,FrameStack,ResizeObservation
 import warnings
 warnings.filterwarnings("ignore")
 
-env = gym_super_mario_bros.make('SuperMarioBros-v0',apply_api_compatibility=True,render_mode="human")
-env = JoypadSpace(env, SIMPLE_MOVEMENT)
-env = ResizeObservation(env,(90,90))
-env = GrayScaleObservation(env=env,keep_dim=True)
-env = FrameStack(env,4)
+num_frames = 4
+image_shape = (90,90)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+def make_env():
+    x = gym_super_mario_bros.make('SuperMarioBros-v0',apply_api_compatibility=True,render_mode="human")
+    x = JoypadSpace(x, SIMPLE_MOVEMENT)
+    x = ResizeObservation(x,image_shape)
+    x = GrayScaleObservation(env=x,keep_dim=True)
+    x = FrameStack(x,num_frames)
+    return x
 
 class network(nn.Module):
     def __init__(self):
@@ -34,7 +39,7 @@ class network(nn.Module):
         x = F.relu(self.conv2(x))
         x = F.relu(self.conv3(x))
         x = F.relu(self.conv4(x))
-        x = torch.flatten(x,start_dim=1) # -> torch.Size([32, 169])
+        x = torch.flatten(x,start_dim=1)  
         x = F.relu(self.output(x))
         policy_output = self.policy_head(x)
         value_output = self.value_head(x)
@@ -42,19 +47,18 @@ class network(nn.Module):
 
 model = network()
 model.forward(torch.rand((1,4,90,90),dtype=torch.float))
-chck = torch.load("./mario20.txt",map_location=device)
-model.load_state_dict(chck["model_state"],strict=False)
+chk = torch.load("./mario30.txt",map_location=device)
+model.load_state_dict(chk["model_state"],strict=False)
 
 if __name__ == "__main__":
+    env = make_env()
     done = True
-    for step in range(10000):
+    for step in range(20000):
         if done:
             state,_ = env.reset()
         state = torch.from_numpy(np.array(state)).squeeze().unsqueeze(0).to(torch.float)
         dist,_ = model.forward(state)
         action = Categorical(dist).sample().item()
-      
         state, reward, done, info,_ = env.step(action)
-        print(action)
     env.close()
 
