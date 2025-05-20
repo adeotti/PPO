@@ -60,5 +60,6 @@ if __name__ == "__main__":
         dist,_ = model.forward(state)
         action = Categorical(dist).sample().item()
         state, reward, done, info,_ = env.step(action)
+        print(reward)
     env.close()
 
