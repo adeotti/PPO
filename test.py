@@ -19,7 +19,7 @@ def make_env():
     x = JoypadSpace(x, SIMPLE_MOVEMENT)
     x = ResizeObservation(x,image_shape)
     x = GrayScaleObservation(env=x,keep_dim=True)
-    x = FrameStack(x,num_frames)
+    #x = FrameStack(x,num_frames)
     return x
 
 class network(nn.Module):
@@ -46,8 +46,8 @@ class network(nn.Module):
         return F.softmax(policy_output,-1),value_output
 
 model = network()
-model.forward(torch.rand((1,4,90,90),dtype=torch.float))
-chk = torch.load("./mario30.txt",map_location=device)
+model.forward(torch.rand((1,1,90,90),dtype=torch.float))
+chk = torch.load("./mario120.txt",map_location=device)
 model.load_state_dict(chk["model_state"],strict=False)
 
 if __name__ == "__main__":
@@ -56,7 +56,7 @@ if __name__ == "__main__":
     for step in range(20000):
         if done:
             state,_ = env.reset()
-        state = torch.from_numpy(np.array(state)).squeeze().unsqueeze(0).to(torch.float)
+        state = torch.from_numpy(state).permute(-1,0,1).to(torch.float32).unsqueeze(0)
         dist,_ = model.forward(state)
         action = Categorical(dist).sample().item()
         state, reward, done, info,_ = env.step(action)
