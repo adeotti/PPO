@@ -45,9 +45,9 @@ class network(nn.Module):
         value_output = self.value_head(x)
         return F.softmax(policy_output,-1),value_output
 
-model = network()
-model.forward(torch.rand((1,1,90,90),dtype=torch.float))
-chk = torch.load("./mario120.txt",map_location=device)
+model = network().to(device)
+model.forward(torch.rand((1,1,90,90),device=device,dtype=torch.float))
+chk = torch.load("./mario260",map_location=device)
 model.load_state_dict(chk["model_state"],strict=False)
 
 if __name__ == "__main__":
