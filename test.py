@@ -45,7 +45,7 @@ class network(nn.Module):
 
 model = network().to(device)
 model.forward(torch.rand((1,1,90,90),device=device,dtype=torch.float))
-chk = torch.load("./mario10.txt",map_location=device)
+chk = torch.load("./mario20.txt",map_location=device)
 model.load_state_dict(chk["model_state"],strict=False)
 
 if __name__ == "__main__":
