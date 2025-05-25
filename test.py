@@ -1,12 +1,11 @@
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
-import numpy as np
 import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 import torch.nn.functional as F
-from gym.wrappers import GrayScaleObservation,FrameStack,ResizeObservation
+from gym.wrappers import GrayScaleObservation,ResizeObservation
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -19,7 +18,6 @@ def make_env():
     x = JoypadSpace(x, SIMPLE_MOVEMENT)
     x = ResizeObservation(x,image_shape)
     x = GrayScaleObservation(env=x,keep_dim=True)
-    #x = FrameStack(x,num_frames)
     return x
 
 class network(nn.Module):
@@ -47,7 +45,7 @@ class network(nn.Module):
 
 model = network().to(device)
 model.forward(torch.rand((1,1,90,90),device=device,dtype=torch.float))
-chk = torch.load("./mario260",map_location=device)
+chk = torch.load("./mario10.txt",map_location=device)
 model.load_state_dict(chk["model_state"],strict=False)
 
 if __name__ == "__main__":
