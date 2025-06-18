@@ -1,0 +1,9 @@
+https://spinningup.openai.com/en/latest/algorithms/ppo.html
+
+https://github.com/vietnh1009/Super-mario-bros-PPO-pytorch/tree/master
+
+https://github.com/yumouwei/super-mario-bros-reinforcement-learning
+
+https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/
+
+https://en.wikipedia.org/wiki/Proximal_policy_optimization
