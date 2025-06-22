@@ -1,17 +1,14 @@
 import warnings
 warnings.filterwarnings("ignore")
-import torch,gym,random
-from dataclasses import dataclass
+import torch,gym
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
 from gym.wrappers import GrayScaleObservation,FrameStack,ResizeObservation
-from gym.vector import SyncVectorEnv
 import numpy as np
 
 import torch.nn as nn
 import torch.nn.functional as F
-
 from torch.distributions import Categorical
 
 class network(nn.Module):
@@ -58,15 +55,15 @@ class test:
 
             def reset(self, **kwargs):
                 self.score = 0
-                obs, info = self.env.reset()
+                obs, info = self.env.reset(**kwargs)
                 return obs,info
 
-        x = gym_super_mario_bros.make("SuperMarioBros-v0",apply_api_compatibility=True,render_mode="human") 
+        x = gym_super_mario_bros.make("SuperMarioBros-v0", apply_api_compatibility=True,render_mode="human")
+        x = JoypadSpace(x, SIMPLE_MOVEMENT)
         x = ResizeObservation(x,(100,100))
-        x = CustomEnv(x,4) 
-        x = JoypadSpace(x, SIMPLE_MOVEMENT)  
-        x = GrayScaleObservation(x,True)
-        x = FrameStack(x,4)
+        x = CustomEnv(x,4)
+        x = GrayScaleObservation(x, keep_dim=True)
+        x = FrameStack(x,4) 
         return x
 
     @staticmethod
@@ -74,7 +71,7 @@ class test:
         if start:
             with torch.no_grad():
                 model = network()
-                chk = torch.load(".\mario160",map_location="cpu")
+                chk = torch.load(".\mario380",map_location="cpu")
                 model.load_state_dict(chk["model_state"],strict=False)
                 env = __class__.make_env()
                 done = True
@@ -85,7 +82,7 @@ class test:
                         print(epi_rewards)
                         epi_rewards = 0
                     state = torch.from_numpy(np.array(state)).permute(-1,0,1,2).to(torch.float32) / 255.
-                    dist,_ = model.forward(state)
+                    dist = model.forward(state)
                     action = Categorical(dist).sample().item()
                     state, reward, done, info,_ = env.step(action)
                     epi_rewards += reward
