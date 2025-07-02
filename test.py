@@ -69,7 +69,7 @@ class test:
         if start:
             with torch.no_grad():
                 model = network()
-                chk = torch.load(".\mario180",map_location="cpu")
+                chk = torch.load(".\mario1470",map_location="cpu")
                 model.load_state_dict(chk["model_state"],strict=False)
                 env = __class__.make_env()
                 done = True
