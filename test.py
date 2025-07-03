@@ -39,8 +39,7 @@ class test:
             def __init__(self,env,skip):
                 super().__init__(env)
                 self.skip = skip
-                self.score = 0
-                
+
             def step(self, action):
                 total_reward = 0  
                 for _ in range(self.skip):
@@ -52,7 +51,6 @@ class test:
                 return obs,(total_reward/10.),done,truncared,info
 
             def reset(self, **kwargs):
-                self.score = 0
                 obs, info = self.env.reset(**kwargs)
                 return obs,info
 
@@ -69,7 +67,7 @@ class test:
         if start:
             with torch.no_grad():
                 model = network()
-                chk = torch.load(".\\9_mario90",map_location="cpu")
+                chk = torch.load(".\mario330",map_location="cpu")
                 model.load_state_dict(chk["model_state"],strict=False)
                 env = __class__.make_env()
                 done = True
