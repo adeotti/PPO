@@ -45,5 +45,3 @@ for step in range(10000):
         total_reward = 0
 
 env.close()
-
-
