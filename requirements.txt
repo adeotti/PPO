@@ -1,9 +1,7 @@
-# python 3.9
+# python 3.9, 3.10
 numpy==1.25.2
 torch==2.7.0
-torchvision==0.22.0
 gym_super_mario_bros==7.4.0
-opencv-python==4.11.0.86
 gym==0.26.2
 nes_py==8.2.1
 gymnasium==0.29.1
