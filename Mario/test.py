@@ -9,6 +9,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
 
+device = "cpu"
+
 class network(nn.Module):
     def __init__(self):
         super().__init__()
@@ -17,8 +19,11 @@ class network(nn.Module):
         self.conv3 = nn.LazyConv2d(32,3,2,2)
         self.conv4 = nn.LazyConv2d(32,3,2,2)
         self.output = nn.LazyLinear(80)
+
         self.policy_head = nn.LazyLinear(7)
-       
+        self.value_head = nn.LazyLinear(1)
+        #self.optim = torch.optim.Adam(self.parameters(),lr=configs.lr)
+        
     def forward(self,x):
         x = F.relu(self.conv1(x))
         x = F.relu(self.conv2(x))
@@ -27,10 +32,22 @@ class network(nn.Module):
         x = torch.flatten(x,start_dim=1) # -> torch.Size([32, 169])
         x = F.relu(self.output(x))
         policy_output = self.policy_head(x)
-        return F.softmax(policy_output,-1) 
+        value_output = self.value_head(x)
+        return F.softmax(policy_output,-1),value_output
 
-m = network()
-m.forward(torch.rand(1,4,100,100))
+def init_weights(layer):
+    if isinstance(layer,(nn.Conv2d,nn.Linear)):
+        nn.init.orthogonal_(layer.weight)
+        nn.init.constant_(layer.bias,0.0)
+     
+model = network().to(device)
+model.forward(
+    torch.rand(
+        (1,4,100,100),dtype=torch.float32,device=device
+    )
+)
+model.apply(init_weights)
+model = nn.DataParallel(model)
 
 class test:
     @staticmethod
@@ -67,7 +84,7 @@ class test:
         if start:
             with torch.no_grad():
                 model = network()
-                chk = torch.load(".\mario290",map_location="cpu")
+                chk = torch.load("Mario\mario290",map_location="cpu")
                 model.load_state_dict(chk["model_state"],strict=False)
                 env = __class__.make_env()
                 done = True
@@ -77,8 +94,10 @@ class test:
                         state,_ = env.reset()
                         print(epi_rewards)
                         epi_rewards = 0
-                    state = torch.from_numpy(np.array(state)).permute(-1,0,1,2).to(torch.float32) / 255.
-                    dist = model.forward(state)
+                        import sys
+                    #state = torch.from_numpy(np.array(state)).permute(-1,0,1,2).to(torch.float32) / 255.
+                    state = torch.from_numpy(np.array(state)).permute(-1,0,1,2).to(device,torch.float32) / 255.
+                    dist,_ = model(state)
                     action = Categorical(dist).sample().item()
                     state, reward, done, info,_ = env.step(action)
                     epi_rewards += reward
