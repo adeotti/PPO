@@ -1,9 +1,8 @@
 import gymnasium as gym
-import torch,sys
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Categorical
-
 
 class network(nn.Module):
     def __init__(self, *args, **kwargs):
@@ -24,18 +23,16 @@ class network(nn.Module):
     
 model = network().to("cpu")
 model(torch.rand((5,4),dtype=torch.float32,device="cpu"))
-chk = torch.load("CartPole\CartPole.pth",map_location="cpu")
-model.load_state_dict(chk["model_state"],strict=False)
+model.load_state_dict(torch.load("CartPole\CartPole.pth",map_location="cpu") ,strict=False)
 
 env = gym.make("CartPole-v1", render_mode="human")
 
 obs, _ = env.reset()
 total_reward = 0
 
-for step in range(10000):
+for _ in range(100):
     probs,_ = model(torch.from_numpy(obs).to(torch.float32))
     action = Categorical(probs).sample().tolist()
-    #action = env.action_space.sample()
     obs, reward, done, truncated, info = env.step(action)
     total_reward += reward
     env.render()
