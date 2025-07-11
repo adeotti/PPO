@@ -84,7 +84,7 @@ class test:
         if start:
             with torch.no_grad():
                 model = network()
-                chk = torch.load("Mario\mario280",map_location="cpu")
+                chk = torch.load("Mario\mario240",map_location="cpu")
                 model.load_state_dict(chk["model_state"],strict=False)
                 env = __class__.make_env()
                 done = True
@@ -92,14 +92,12 @@ class test:
                 for _ in range(num_game):
                     if done:
                         state,_ = env.reset()
-                        print(epi_rewards)
                         epi_rewards = 0
-                        import sys
-                    #state = torch.from_numpy(np.array(state)).permute(-1,0,1,2).to(torch.float32) / 255.
+    
                     state = torch.from_numpy(np.array(state)).permute(-1,0,1,2).to(device,torch.float32) / 255.
                     dist,_ = model(state)
                     action = Categorical(dist).sample().item()
-                    state, reward, done, info,_ = env.step(action)
+                    state, reward, done, _,_ = env.step(action)
                     epi_rewards += reward
                     env.render()
                 env.close()
