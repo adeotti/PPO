@@ -84,7 +84,7 @@ class test:
         if start:
             with torch.no_grad():
                 model = network()
-                chk = torch.load("Mario\mario240",map_location="cpu")
+                chk = torch.load(".\\training_data\mario200",map_location="cpu")
                 model.load_state_dict(chk["model_state"],strict=False)
                 env = __class__.make_env()
                 done = True
@@ -96,7 +96,7 @@ class test:
     
                     state = torch.from_numpy(np.array(state)).permute(-1,0,1,2).to(device,torch.float32) / 255.
                     dist,_ = model(state)
-                    action = Categorical(dist).sample().item()
+                    action = dist.argmax().item()
                     state, reward, done, _,_ = env.step(action)
                     epi_rewards += reward
                     env.render()
