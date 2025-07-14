@@ -30,9 +30,9 @@ env = gym.make("CartPole-v1", render_mode="human")
 obs, _ = env.reset()
 total_reward = 0
 
-for _ in range(100):
+for _ in range(1000):
     probs,_ = model(torch.from_numpy(obs).to(torch.float32))
-    action = Categorical(probs).sample().tolist()
+    action = probs.argmax().item()
     obs, reward, done, truncated, info = env.step(action)
     total_reward += reward
     env.render()
