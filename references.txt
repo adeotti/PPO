@@ -7,3 +7,5 @@ https://github.com/yumouwei/super-mario-bros-reinforcement-learning
 https://iclr-blog-track.github.io/2022/03/25/ppo-implementation-details/
 
 https://en.wikipedia.org/wiki/Proximal_policy_optimization
+
+https://datacrystal.tcrf.net/wiki/Super_Mario_Bros./RAM_map
