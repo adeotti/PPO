@@ -1,4 +1,4 @@
-import torch,gym,sys
+import torch,gym
 import gym_super_mario_bros
 from nes_py.wrappers import JoypadSpace
 from gym_super_mario_bros.actions import SIMPLE_MOVEMENT
@@ -10,10 +10,10 @@ import torch.nn.functional as F
 class network(nn.Module):
     def __init__(self):
         super().__init__()
-        self.conv1 = nn.LazyConv2d(32,3,2,1)
-        self.conv2 = nn.LazyConv2d(32,3,2,1)
-        self.conv3 = nn.LazyConv2d(32,3,2,1)
-        self.conv4 = nn.LazyConv2d(32,3,2,1)
+        self.conv1 = nn.LazyConv2d(32,1,1,0)
+        self.conv2 = nn.LazyConv2d(32,3,2,2)
+        self.conv3 = nn.LazyConv2d(32,3,2,2)
+        self.conv4 = nn.LazyConv2d(32,3,2,2)
         self.output = nn.LazyLinear(512)
         self.policy_head = nn.LazyLinear(7)
         self.value_head = nn.LazyLinear(1)
@@ -31,7 +31,7 @@ class network(nn.Module):
 model = network().to("cpu")
 model(torch.rand((1,4,100,100),dtype=torch.float32,device="cpu"))
 model = nn.DataParallel(model)
-chk = torch.load(".\Mario\\training_data\\1\mario380",map_location="cpu")
+chk = torch.load("Mario\Mario.pth",map_location="cpu")
 model.load_state_dict(chk["model_state"],strict=True)
 model.eval()
 
@@ -57,7 +57,7 @@ class test:
                 obs, info = self.env.reset(**kwargs)
                 return obs,info
 
-        x = gym_super_mario_bros.make("SuperMarioBros-v0", apply_api_compatibility=True,render_mode="human")
+        x = gym_super_mario_bros.make("SuperMarioBros-1-1-v0", apply_api_compatibility=True,render_mode="human")
         x = JoypadSpace(x, SIMPLE_MOVEMENT)
         x = ResizeObservation(x,(100,100))
         x = CustomEnv(x,4)
@@ -77,7 +77,7 @@ class test:
                 state = torch.from_numpy(np.array(state)).squeeze(-1).unsqueeze(0).to(torch.float32) / 255.
                 dist = model(state)
                 action = dist.argmax().item()
-                state, reward, done, _,_ = env.step(action)
+                state,_, done, _,_ = env.step(action)
                 env.render()
             env.close()
 
