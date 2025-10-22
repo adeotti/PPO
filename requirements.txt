@@ -1,6 +1,6 @@
 # python 3.9, 3.10
 numpy==1.25.2
-torch==2.7.0
+torch==2.8.0 # move back to 2.7.0 if facing an issue
 gym_super_mario_bros==7.4.0
 gym==0.26.2
 nes_py==8.2.1
